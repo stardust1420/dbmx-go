@@ -142,6 +142,29 @@ func (c *Client) EnableStardustAI(ctx context.Context) (Customer, error) {
 	return customer, nil
 }
 
+func (c *Client) DisableStardustAI(ctx context.Context) (bool, error) {
+	url := "/api/v1/user/disable-stardust-ai"
+
+	args := httpHandlerArgs{
+		URL:         url,
+		Method:      POST,
+		Credentials: c.Credentials,
+	}
+
+	res, err := httpHandler(ctx, args)
+	if err != nil {
+		return false, errors.Wrap(err, "Failed to disable Stardust AI")
+	}
+
+	var response Response
+	err = json.Unmarshal(res, &response)
+	if err != nil {
+		return false, errors.Wrap(err, "Failed to unmarshal response")
+	}
+
+	return response.Data.(bool), nil
+}
+
 func (c *Client) SwitchDefaultKey(ctx context.Context, switchValue bool) (bool, error) {
 	switchValueStr := "false"
 	if switchValue {
