@@ -110,13 +110,6 @@ type Customer struct {
 	Name string `json:"name"`
 }
 
-type Response struct {
-	Success    bool   `json:"success"`
-	Message    string `json:"message"`
-	StatusCode int    `json:"status_code"`
-	Data       any    `json:"data"`
-}
-
 func (c *Client) EnableStardustAI(ctx context.Context) (Customer, error) {
 	url := "/api/v1/user/enable-stardust-ai"
 
@@ -131,15 +124,18 @@ func (c *Client) EnableStardustAI(ctx context.Context) (Customer, error) {
 		return Customer{}, errors.Wrap(err, "Failed to enable Stardust AI")
 	}
 
-	var response Response
-	err = json.Unmarshal(res, &response)
+	var enableStardustAIRes struct {
+		Success    bool     `json:"success"`
+		Message    string   `json:"message"`
+		StatusCode int      `json:"status_code"`
+		Data       Customer `json:"data"`
+	}
+	err = json.Unmarshal(res, &enableStardustAIRes)
 	if err != nil {
 		return Customer{}, errors.Wrap(err, "Failed to unmarshal customer response")
 	}
 
-	customer := response.Data.(Customer)
-
-	return customer, nil
+	return enableStardustAIRes.Data, nil
 }
 
 func (c *Client) DisableStardustAI(ctx context.Context) (bool, error) {
@@ -156,13 +152,18 @@ func (c *Client) DisableStardustAI(ctx context.Context) (bool, error) {
 		return false, errors.Wrap(err, "Failed to disable Stardust AI")
 	}
 
-	var response Response
-	err = json.Unmarshal(res, &response)
+	var disableStardustAIRes struct {
+		Success    bool   `json:"success"`
+		Message    string `json:"message"`
+		StatusCode int    `json:"status_code"`
+		Data       bool   `json:"data"`
+	}
+	err = json.Unmarshal(res, &disableStardustAIRes)
 	if err != nil {
 		return false, errors.Wrap(err, "Failed to unmarshal response")
 	}
 
-	return response.Data.(bool), nil
+	return disableStardustAIRes.Data, nil
 }
 
 func (c *Client) SwitchDefaultKey(ctx context.Context, switchValue bool) (bool, error) {
@@ -183,11 +184,16 @@ func (c *Client) SwitchDefaultKey(ctx context.Context, switchValue bool) (bool, 
 		return false, errors.Wrap(err, "Failed to enable Stardust AI")
 	}
 
-	var response Response
-	err = json.Unmarshal(res, &response)
+	var switchDefaultKeyRes struct {
+		Success    bool   `json:"success"`
+		Message    string `json:"message"`
+		StatusCode int    `json:"status_code"`
+		Data       bool   `json:"data"`
+	}
+	err = json.Unmarshal(res, &switchDefaultKeyRes)
 	if err != nil {
 		return false, errors.Wrap(err, "Failed to unmarshal customer response")
 	}
 
-	return response.Data.(bool), nil
+	return switchDefaultKeyRes.Data, nil
 }
