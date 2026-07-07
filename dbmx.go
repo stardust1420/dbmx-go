@@ -197,3 +197,36 @@ func (c *Client) SwitchDefaultKey(ctx context.Context, switchValue bool) (bool, 
 
 	return switchDefaultKeyRes.Data, nil
 }
+
+type UserProvider struct {
+	Provider string `json:"provider"`
+	APIKey   string `json:"api_key"`
+}
+
+func (c *Client) ListUserProviders(ctx context.Context) ([]UserProvider, error) {
+	url := "/api/v1/user/providers/list"
+
+	args := httpHandlerArgs{
+		URL:         url,
+		Method:      GET,
+		Credentials: c.Credentials,
+	}
+
+	res, err := httpHandler(ctx, args)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to fetch user providers")
+	}
+
+	var ListUserProvidersRes struct {
+		Success    bool           `json:"success"`
+		Message    string         `json:"message"`
+		StatusCode int            `json:"status_code"`
+		Data       []UserProvider `json:"data"`
+	}
+	err = json.Unmarshal(res, &ListUserProvidersRes)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to unmarshal user providers")
+	}
+
+	return ListUserProvidersRes.Data, nil
+}
