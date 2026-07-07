@@ -199,6 +199,7 @@ func (c *Client) SwitchDefaultKey(ctx context.Context, switchValue bool) (bool, 
 }
 
 type UserProvider struct {
+	KeyID    string `json:"key_id"`
 	Provider string `json:"provider"`
 	APIKey   string `json:"api_key"`
 }
