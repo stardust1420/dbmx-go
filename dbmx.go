@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 )
@@ -230,4 +231,151 @@ func (c *Client) ListUserProviders(ctx context.Context) ([]UserProvider, error) 
 	}
 
 	return ListUserProvidersRes.Data, nil
+}
+
+type AddProviderAPIKeyReq struct {
+	Provider string `json:"provider"`
+	APIKey   string `json:"api_key"`
+}
+
+type VirtualKey struct {
+	ID              string           `json:"id"`
+	Value           string           `json:"value"`
+	Name            string           `json:"name"`
+	Description     string           `json:"description"`
+	CustomerID      string           `json:"customer_id"`
+	IsActive        bool             `json:"is_active"`
+	ProviderConfigs []ProviderConfig `json:"provider_configs"`
+
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type ProviderConfig struct {
+	ID                int64    `json:"id"`
+	VirtualKeyID      string   `json:"virtual_key_id"`
+	Provider          string   `json:"provider"`
+	Weight            *int64   `json:"weight"`
+	AllowedModels     []string `json:"allowed_models"`
+	BlacklistedModels []string `json:"blacklisted_models"`
+	AllowAllKeys      bool     `json:"allow_all_keys"`
+	Keys              []Key    `json:"keys"`
+}
+
+type Key struct {
+	ID         int64     `json:"id"`
+	Name       string    `json:"name"`
+	Value      Value     `json:"value"`
+	ProviderID int64     `json:"provider_id"`
+	Provider   string    `json:"provider"`
+	KeyID      string    `json:"key_id"`
+	Models     []string  `json:"models"`
+	Weight     int64     `json:"weight"`
+	Enabled    bool      `json:"enabled"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
+}
+
+type Value struct {
+	Value   string `json:"value"`
+	EnvVar  string `json:"env_var"`
+	FromEnv bool   `json:"from_env"`
+}
+
+func (c *Client) AddProviderAPIKey(ctx context.Context, r AddProviderAPIKeyReq) (VirtualKey, error) {
+	url := "/api/v1/providers/api-key"
+
+	args := httpHandlerArgs{
+		URL:         url,
+		Method:      POST,
+		Payload:     r,
+		Credentials: c.Credentials,
+	}
+
+	res, err := httpHandler(ctx, args)
+	if err != nil {
+		return VirtualKey{}, errors.Wrap(err, "Failed to add provider api key")
+	}
+
+	var AddProviderAPIKeyRes struct {
+		Success    bool       `json:"success"`
+		Message    string     `json:"message"`
+		StatusCode int        `json:"status_code"`
+		Data       VirtualKey `json:"data"`
+	}
+	err = json.Unmarshal(res, &AddProviderAPIKeyRes)
+	if err != nil {
+		return VirtualKey{}, errors.Wrap(err, "Failed to unmarshal virtual key")
+	}
+
+	return AddProviderAPIKeyRes.Data, nil
+}
+
+type UpdateProviderAPIKeyReq struct {
+	KeyID    string `json:"key_id"`
+	Provider string `json:"provider"`
+	ApiKey   string `json:"api_key"`
+}
+
+func (c *Client) UpdateProviderAPIKey(ctx context.Context, r UpdateProviderAPIKeyReq) (bool, error) {
+	url := "/api/v1/providers/api-key"
+
+	args := httpHandlerArgs{
+		URL:         url,
+		Method:      PUT,
+		Payload:     r,
+		Credentials: c.Credentials,
+	}
+
+	res, err := httpHandler(ctx, args)
+	if err != nil {
+		return false, errors.Wrap(err, "Failed to update provider api key")
+	}
+
+	var UpdateProviderAPIKeyRes struct {
+		Success    bool   `json:"success"`
+		Message    string `json:"message"`
+		StatusCode int    `json:"status_code"`
+		Data       bool   `json:"data"`
+	}
+	err = json.Unmarshal(res, &UpdateProviderAPIKeyRes)
+	if err != nil {
+		return false, errors.Wrap(err, "Failed to unmarshal provider key")
+	}
+
+	return UpdateProviderAPIKeyRes.Data, nil
+}
+
+type DeleteProviderAPIKeyReq struct {
+	KeyID    string `json:"key_id"`
+	Provider string `json:"provider"`
+}
+
+func (c *Client) DeleteProviderAPIKey(ctx context.Context, r DeleteProviderAPIKeyReq) (bool, error) {
+	url := fmt.Sprintf("/api/v1/providers/api-key?provider=%s&key_id=%s", r.Provider, r.KeyID)
+
+	args := httpHandlerArgs{
+		URL:         url,
+		Method:      DELETE,
+		Payload:     r,
+		Credentials: c.Credentials,
+	}
+
+	res, err := httpHandler(ctx, args)
+	if err != nil {
+		return false, errors.Wrap(err, "Failed to delete provider api key")
+	}
+
+	var DeleteProviderAPIKeyRes struct {
+		Success    bool   `json:"success"`
+		Message    string `json:"message"`
+		StatusCode int    `json:"status_code"`
+		Data       bool   `json:"data"`
+	}
+	err = json.Unmarshal(res, &DeleteProviderAPIKeyRes)
+	if err != nil {
+		return false, errors.Wrap(err, "Failed to unmarshal provider key")
+	}
+
+	return DeleteProviderAPIKeyRes.Data, nil
 }
