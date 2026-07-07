@@ -314,7 +314,7 @@ func (c *Client) AddProviderAPIKey(ctx context.Context, r AddProviderAPIKeyReq) 
 type UpdateProviderAPIKeyReq struct {
 	KeyID    string `json:"key_id"`
 	Provider string `json:"provider"`
-	ApiKey   string `json:"api_key"`
+	APIKey   string `json:"api_key"`
 }
 
 func (c *Client) UpdateProviderAPIKey(ctx context.Context, r UpdateProviderAPIKeyReq) (bool, error) {
