@@ -205,8 +205,8 @@ type UserProvider struct {
 	APIKey   string `json:"api_key"`
 }
 
-func (c *Client) ListUserProviders(ctx context.Context) ([]UserProvider, error) {
-	url := "/api/v1/user/providers/list"
+func (c *Client) ListProviders(ctx context.Context) ([]UserProvider, error) {
+	url := "/api/v1/providers/list"
 
 	args := httpHandlerArgs{
 		URL:         url,
