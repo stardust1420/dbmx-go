@@ -379,3 +379,36 @@ func (c *Client) DeleteProviderAPIKey(ctx context.Context, r DeleteProviderAPIKe
 
 	return DeleteProviderAPIKeyRes.Data, nil
 }
+
+type Model struct {
+	ID             string `json:"id"`
+	NormalizedName string `json:"normalized_name"`
+}
+
+func (c *Client) ListAvailableModels(ctx context.Context) ([]Model, error) {
+	url := "/api/v1/models/list"
+
+	args := httpHandlerArgs{
+		URL:         url,
+		Method:      GET,
+		Credentials: c.Credentials,
+	}
+
+	res, err := httpHandler(ctx, args)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to list available models")
+	}
+
+	var ListAvailableModelsRes struct {
+		Success    bool    `json:"success"`
+		Message    string  `json:"message"`
+		StatusCode int     `json:"status_code"`
+		Data       []Model `json:"data"`
+	}
+	err = json.Unmarshal(res, &ListAvailableModelsRes)
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to unmarshal available models")
+	}
+
+	return ListAvailableModelsRes.Data, nil
+}
