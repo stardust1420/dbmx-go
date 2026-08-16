@@ -455,19 +455,19 @@ func (c *Client) Chat(ctx context.Context, r ChatReq) (CreateAChatCompletionMess
 	}
 
 	var ChatRes struct {
-		Success    bool                       `json:"success"`
-		Message    string                     `json:"message"`
-		StatusCode int                        `json:"status_code"`
-		Data       []CreateAChatCompletionRes `json:"data"`
+		Success    bool                     `json:"success"`
+		Message    string                   `json:"message"`
+		StatusCode int                      `json:"status_code"`
+		Data       CreateAChatCompletionRes `json:"data"`
 	}
 	err = json.Unmarshal(res, &ChatRes)
 	if err != nil {
 		return CreateAChatCompletionMessage{}, errors.Wrap(err, "Failed to unmarshal chat")
 	}
 
-	choices := ChatRes.Data[0].Choices
+	choices := ChatRes.Data.Choices
 	message := choices[len(choices)-1].Message
-	message.ID = ChatRes.Data[0].ID
+	message.ID = ChatRes.Data.ID
 
 	return message, nil
 }
