@@ -423,6 +423,7 @@ type ChatReq struct {
 }
 
 type CreateAChatCompletionMessage struct {
+	ID      string `json:"id"`
 	Role    string `json:"role"`
 	Content string `json:"content"`
 }
@@ -466,6 +467,7 @@ func (c *Client) Chat(ctx context.Context, r ChatReq) (CreateAChatCompletionMess
 
 	choices := ChatRes.Data[0].Choices
 	message := choices[len(choices)-1].Message
+	message.ID = ChatRes.Data[0].ID
 
 	return message, nil
 }
