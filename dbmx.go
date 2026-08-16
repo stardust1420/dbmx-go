@@ -412,3 +412,60 @@ func (c *Client) ListAvailableModels(ctx context.Context) ([]Model, error) {
 
 	return ListAvailableModelsRes.Data, nil
 }
+
+type Message struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+type ChatReq struct {
+	Model    string    `json:"model"`
+	Messages []Message `json:"messages"`
+}
+
+type CreateAChatCompletionMessage struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
+type CreateAChatCompletionResChoice struct {
+	Index        int64                        `json:"index"`
+	FinishReason string                       `json:"finish_reason"`
+	Message      CreateAChatCompletionMessage `json:"message"`
+}
+
+type CreateAChatCompletionRes struct {
+	ID      string                           `json:"id"`
+	Choices []CreateAChatCompletionResChoice `json:"choices"`
+}
+
+func (c *Client) Chat(ctx context.Context, r ChatReq) (CreateAChatCompletionMessage, error) {
+	url := "/api/v1/chat"
+
+	args := httpHandlerArgs{
+		URL:         url,
+		Method:      POST,
+		Payload:     r,
+		Credentials: c.Credentials,
+	}
+
+	res, err := httpHandler(ctx, args)
+	if err != nil {
+		return CreateAChatCompletionMessage{}, errors.Wrap(err, "Failed to create a chat completion")
+	}
+
+	var ChatRes struct {
+		Success    bool                       `json:"success"`
+		Message    string                     `json:"message"`
+		StatusCode int                        `json:"status_code"`
+		Data       []CreateAChatCompletionRes `json:"data"`
+	}
+	err = json.Unmarshal(res, &ChatRes)
+	if err != nil {
+		return CreateAChatCompletionMessage{}, errors.Wrap(err, "Failed to unmarshal chat")
+	}
+
+	choices := ChatRes.Data[0].Choices
+	message := choices[len(choices)-1].Message
+
+	return message, nil
+}
