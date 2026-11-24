@@ -92,6 +92,11 @@ func (c *Client) GetUserIdentity(ctx context.Context, userID string) (Identity, 
 	return call[Identity](ctx, c, GET, "/api/v1/users/"+url.PathEscape(userID)+"/identity", nil, "get user identity")
 }
 
+// ListUserDevices is a co-member's live devices.
+func (c *Client) ListUserDevices(ctx context.Context, userID string) ([]Device, error) {
+	return call[[]Device](ctx, c, GET, "/api/v1/users/"+url.PathEscape(userID)+"/devices", nil, "list user devices")
+}
+
 func devicePath(deviceID string, rest ...string) string {
 	p := "/api/v1/devices"
 	if deviceID != "" {
