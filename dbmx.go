@@ -75,6 +75,7 @@ type httpHandlerArgs struct {
 	Method      httpMethod
 	Payload     any
 	Credentials Credentials
+	Headers     map[string]string
 }
 
 func httpHandler(ctx context.Context, args httpHandlerArgs) ([]byte, error) {
@@ -99,6 +100,9 @@ func httpHandler(ctx context.Context, args httpHandlerArgs) ([]byte, error) {
 
 	// Request Headers
 	req.Header.Add("Content-Type", "application/json")
+	for k, v := range args.Headers {
+		req.Header.Set(k, v)
+	}
 
 	if args.Credentials.AccessToken == "" {
 		return nil, errors.Wrap(err, "Access token is required")

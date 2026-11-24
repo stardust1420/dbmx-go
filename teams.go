@@ -66,8 +66,12 @@ type orgIDReq struct {
 
 // call sends one request and returns the envelope's data.
 func call[T any](ctx context.Context, c *Client, method httpMethod, path string, payload any, what string) (T, error) {
+	return callWithHeaders[T](ctx, c, method, path, payload, nil, what)
+}
+
+func callWithHeaders[T any](ctx context.Context, c *Client, method httpMethod, path string, payload any, headers map[string]string, what string) (T, error) {
 	var zero T
-	res, err := httpHandler(ctx, httpHandlerArgs{URL: path, Method: method, Payload: payload, Credentials: c.Credentials})
+	res, err := httpHandler(ctx, httpHandlerArgs{URL: path, Method: method, Payload: payload, Credentials: c.Credentials, Headers: headers})
 	if err != nil {
 		return zero, errors.Wrap(err, "Failed to "+what)
 	}
