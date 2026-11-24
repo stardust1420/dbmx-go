@@ -28,7 +28,7 @@ type Device struct {
 
 type ShareGroup struct {
 	GroupID          string    `json:"group_id"`
-	OwnerUserID      string    `json:"owner_user_id"`
+	OwnerUserID      string    `json:"owner_user_id,omitempty"`
 	Audience         string    `json:"audience"`
 	DefaultAccess    string    `json:"default_access"`
 	DefaultLoginMode string    `json:"default_login_mode"`
@@ -171,6 +171,7 @@ func (c *Client) ListShareGroups(ctx context.Context, orgID string) ([]ShareGrou
 }
 
 // ListReceivedShares lists the shares sealed to the caller's device.
+// deviceID must be this device's ID.
 func (c *Client) ListReceivedShares(ctx context.Context, deviceID string) ([]ReceivedShare, error) {
 	return callWithHeaders[[]ReceivedShare](ctx, c, GET, "/api/v1/shares", nil,
 		map[string]string{"X-Device-ID": deviceID}, "list received shares")
