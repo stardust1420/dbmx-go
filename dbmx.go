@@ -45,6 +45,9 @@ func (h httpMethod) ToString() string {
 	return string(h)
 }
 
+// ErrPlanRequired is returned when the server answers 402: the user has no plan.
+var ErrPlanRequired = errors.New("plan required")
+
 type httpHandlerArgs struct {
 	URL         string
 	Method      httpMethod
@@ -99,6 +102,9 @@ func httpHandler(ctx context.Context, args httpHandlerArgs) ([]byte, error) {
 	}
 
 	// Check for error
+	if res.StatusCode == http.StatusPaymentRequired {
+		return nil, fmt.Errorf("%w: %s", ErrPlanRequired, string(responseBytes))
+	}
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
 		return nil, fmt.Errorf("HTTP request failed with status code %d: %s", res.StatusCode, string(responseBytes))
 	}
