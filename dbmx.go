@@ -48,6 +48,28 @@ func (h httpMethod) ToString() string {
 // ErrPlanRequired is returned when the server answers 402: the user has no plan.
 var ErrPlanRequired = errors.New("plan required")
 
+// APIError is a non-2xx answer other than 402. Message is the server's own
+// message, fit to show the user.
+type APIError struct {
+	Status  int
+	Message string
+	body    string
+}
+
+func (e *APIError) Error() string {
+	return fmt.Sprintf("HTTP request failed with status code %d: %s", e.Status, e.body)
+}
+
+func errorMessage(body []byte) string {
+	var env struct {
+		Message string `json:"message"`
+	}
+	if json.Unmarshal(body, &env) == nil && env.Message != "" {
+		return env.Message
+	}
+	return strings.TrimSpace(string(body))
+}
+
 type httpHandlerArgs struct {
 	URL         string
 	Method      httpMethod
@@ -106,7 +128,7 @@ func httpHandler(ctx context.Context, args httpHandlerArgs) ([]byte, error) {
 		return nil, fmt.Errorf("%w: %s", ErrPlanRequired, string(responseBytes))
 	}
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
-		return nil, fmt.Errorf("HTTP request failed with status code %d: %s", res.StatusCode, string(responseBytes))
+		return nil, &APIError{Status: res.StatusCode, Message: errorMessage(responseBytes), body: string(responseBytes)}
 	}
 
 	return responseBytes, nil

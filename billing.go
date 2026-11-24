@@ -17,6 +17,7 @@ type Billing struct {
 	TrialEndsAt             *time.Time `json:"trial_ends_at"`
 	TrialAvailable          bool       `json:"trial_available"`
 	AIEntitled              bool       `json:"ai_entitled"`
+	TeamCoversAI            bool       `json:"team_covers_ai"`
 }
 
 func (c *Client) billingStatus(ctx context.Context, method httpMethod, url string, payload any) (Billing, error) {
