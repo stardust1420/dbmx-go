@@ -13,7 +13,7 @@ type Org struct {
 	ID          string    `json:"id"`
 	Name        string    `json:"name"`
 	OwnerUserID string    `json:"owner_user_id"`
-	CreatedAt   time.Time `json:"created_at"`
+	CreatedAt   time.Time `json:"created_at" ts_type:"string"`
 }
 
 // OrgSummary is an org as listed for one user: their role and the headcount.
@@ -28,7 +28,7 @@ type Member struct {
 	Email    string    `json:"email"`
 	Name     string    `json:"name"`
 	Role     string    `json:"role"`
-	JoinedAt time.Time `json:"joined_at"`
+	JoinedAt time.Time `json:"joined_at" ts_type:"string"`
 }
 
 // Invite is an invite as the org's owner sees it.
@@ -37,8 +37,8 @@ type Invite struct {
 	OrgID     string    `json:"org_id"`
 	Email     string    `json:"email"`
 	InvitedBy string    `json:"invited_by"`
-	CreatedAt time.Time `json:"created_at"`
-	ExpiresAt time.Time `json:"expires_at"`
+	CreatedAt time.Time `json:"created_at" ts_type:"string"`
+	ExpiresAt time.Time `json:"expires_at" ts_type:"string"`
 }
 
 // PendingInvite is an invite addressed to the signed-in user. The server
@@ -48,7 +48,7 @@ type PendingInvite struct {
 	OrgID     string    `json:"org_id"`
 	OrgName   string    `json:"org_name"`
 	InvitedBy string    `json:"invited_by"`
-	ExpiresAt time.Time `json:"expires_at"`
+	ExpiresAt time.Time `json:"expires_at" ts_type:"string"`
 }
 
 // OrgBilling is an org's Team plan, in the shape of Billing plus its seats.

@@ -12,9 +12,9 @@ import (
 type Billing struct {
 	Plan                    string     `json:"plan"`
 	Status                  string     `json:"status"`
-	NextBillingDate         *time.Time `json:"next_billing_date"`
+	NextBillingDate         *time.Time `json:"next_billing_date" ts_type:"string"`
 	CancelAtNextBillingDate bool       `json:"cancel_at_next_billing_date"`
-	TrialEndsAt             *time.Time `json:"trial_ends_at"`
+	TrialEndsAt             *time.Time `json:"trial_ends_at" ts_type:"string"`
 	TrialAvailable          bool       `json:"trial_available"`
 	AIEntitled              bool       `json:"ai_entitled"`
 	TeamCoversAI            bool       `json:"team_covers_ai"`
