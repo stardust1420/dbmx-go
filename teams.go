@@ -64,6 +64,11 @@ type orgIDReq struct {
 	OrgID string `json:"org_id"`
 }
 
+type teamCheckoutReq struct {
+	OrgID    string `json:"org_id"`
+	Interval string `json:"interval,omitempty"`
+}
+
 // call sends one request and returns the envelope's data.
 func call[T any](ctx context.Context, c *Client, method httpMethod, path string, payload any, what string) (T, error) {
 	return callWithHeaders[T](ctx, c, method, path, payload, nil, what)
@@ -165,10 +170,12 @@ func (c *Client) StartTeamTrial(ctx context.Context, orgID string) (OrgBilling, 
 	return call[OrgBilling](ctx, c, POST, "/api/v1/billing/team/trial", orgIDReq{OrgID: orgID}, "start team trial")
 }
 
-func (c *Client) CreateTeamCheckout(ctx context.Context, orgID string) (string, error) {
+// CreateTeamCheckout starts the org's Team checkout billed per interval, as
+// for CreateCheckout.
+func (c *Client) CreateTeamCheckout(ctx context.Context, orgID, interval string) (string, error) {
 	out, err := call[struct {
 		URL string `json:"url"`
-	}](ctx, c, POST, "/api/v1/billing/team/checkout", orgIDReq{OrgID: orgID}, "create team checkout")
+	}](ctx, c, POST, "/api/v1/billing/team/checkout", teamCheckoutReq{OrgID: orgID, Interval: interval}, "create team checkout")
 	return out.URL, err
 }
 

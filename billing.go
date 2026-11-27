@@ -14,10 +14,12 @@ type Billing struct {
 	Status                  string     `json:"status"`
 	NextBillingDate         *time.Time `json:"next_billing_date" ts_type:"string"`
 	CancelAtNextBillingDate bool       `json:"cancel_at_next_billing_date"`
-	TrialEndsAt             *time.Time `json:"trial_ends_at" ts_type:"string"`
-	TrialAvailable          bool       `json:"trial_available"`
-	AIEntitled              bool       `json:"ai_entitled"`
-	TeamCoversAI            bool       `json:"team_covers_ai"`
+	// BillingInterval is the subscription's period, "month" or "year"; "" with none.
+	BillingInterval string     `json:"billing_interval"`
+	TrialEndsAt     *time.Time `json:"trial_ends_at" ts_type:"string"`
+	TrialAvailable  bool       `json:"trial_available"`
+	AIEntitled      bool       `json:"ai_entitled"`
+	TeamCoversAI    bool       `json:"team_covers_ai"`
 }
 
 func (c *Client) billingStatus(ctx context.Context, method httpMethod, url string, payload any) (Billing, error) {
@@ -59,7 +61,31 @@ func (c *Client) billingURL(ctx context.Context, url string, payload any) (strin
 }
 
 type planReq struct {
-	Plan string `json:"plan"`
+	Plan     string `json:"plan"`
+	Interval string `json:"interval,omitempty"`
+}
+
+// Price is an amount in the currency's minor units (cents for USD).
+type Price struct {
+	Amount   int64  `json:"amount"`
+	Currency string `json:"currency"`
+}
+
+// PlanPrices is a plan's price per billing period; nil when the server
+// offers no such period.
+type PlanPrices struct {
+	Month *Price `json:"month"`
+	Year  *Price `json:"year"`
+}
+
+type Prices struct {
+	Pro  PlanPrices `json:"pro"`
+	Team PlanPrices `json:"team"`
+}
+
+// GetPrices returns the plans' prices, as the payment provider has them.
+func (c *Client) GetPrices(ctx context.Context) (Prices, error) {
+	return call[Prices](ctx, c, GET, "/api/v1/billing/prices", nil, "get prices")
 }
 
 func (c *Client) GetBilling(ctx context.Context) (Billing, error) {
@@ -72,8 +98,10 @@ func (c *Client) StartTrial(ctx context.Context, plan string) (Billing, error) {
 	return b, errors.Wrap(err, "Failed to start trial")
 }
 
-func (c *Client) CreateCheckout(ctx context.Context, plan string) (string, error) {
-	u, err := c.billingURL(ctx, "/api/v1/billing/checkout", planReq{Plan: plan})
+// CreateCheckout starts a checkout for plan billed per interval ("month" or
+// "year"; "" lets the server pick yearly).
+func (c *Client) CreateCheckout(ctx context.Context, plan, interval string) (string, error) {
+	u, err := c.billingURL(ctx, "/api/v1/billing/checkout", planReq{Plan: plan, Interval: interval})
 	return u, errors.Wrap(err, "Failed to create checkout")
 }
 
