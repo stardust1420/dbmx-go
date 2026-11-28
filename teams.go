@@ -137,6 +137,12 @@ func (c *Client) TransferOrg(ctx context.Context, orgID, userID string) (pending
 	return out.Pending, err
 }
 
+// CancelTransfer calls off the org's pending ownership transfer (owner only).
+func (c *Client) CancelTransfer(ctx context.Context, orgID string) error {
+	_, err := call[bool](ctx, c, DELETE, orgPath(orgID, "transfer"), nil, "cancel transfer")
+	return err
+}
+
 func (c *Client) InviteMember(ctx context.Context, orgID, email string) (Invite, error) {
 	return call[Invite](ctx, c, POST, orgPath(orgID, "invites"), map[string]string{"email": email}, "invite member")
 }
