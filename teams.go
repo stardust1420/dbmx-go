@@ -58,6 +58,9 @@ type OrgBilling struct {
 	SeatsOutOfSync     bool    `json:"seats_out_of_sync"`
 	TrialMemberCap     int     `json:"trial_member_cap"`
 	PendingOwnerUserID *string `json:"pending_owner_user_id"`
+	// OwnerPays: the subscription shown is the current owner's, not a former
+	// owner's plan running out after a handover.
+	OwnerPays bool `json:"owner_pays"`
 }
 
 type orgIDReq struct {
